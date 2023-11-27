@@ -1,0 +1,101 @@
+---
+title: "R Function HW"
+author: "Zaneta Ku"
+date: "2023-10-25"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 6. How would you generalize the original code to work with any set of input protein structures?
+
+```{r}
+# Original Code 1
+df <- data.frame(a=1:10, b=seq(200,400,length=10),c=11:20,d=NA)
+df$a <- (df$a - min(df$a)) / (max(df$a) - min(df$a))
+df$b <- (df$b - min(df$a)) / (max(df$b) - min(df$b))
+df$c <- (df$c - min(df$c)) / (max(df$c) - min(df$c))
+df$d <- (df$d - min(df$d)) / (max(df$a) - min(df$d))
+
+```
+
+```{r}
+# Original Code 2 (for protein drug interaction)
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+
+```
+
+## Answer for Question 6.
+
+```{r}
+
+# Define "analyze_protein_interactions"
+
+analyze_protein_interactions <- function(pdb_files, plot_title = "Bfactor Comparison", chain = "A", elety = "CA") {
+  
+# Load the required bio3d package to handle the PDB data
+  library(bio3d)
+  
+# Initialize two empty lists:
+# pdb_list will store the trimmed PDB data for each protein
+# b_factors will store the B factors for each protein
+  pdb_list <- list()
+  b_factors <- list()
+
+# Loop to iterate over each PDB file:
+  for(i in 1:length(pdb_files)) {
+
+# Read the PDB data using read.pdb
+    pdb_data <- read.pdb(pdb_files[i])
+    
+# Trim the PDB data using the specified chain and atom type
+    trimmed_data <- trim.pdb(pdb_data, chain = chain, elety = elety)
+    
+# Store the trimmed data in the pdb_list
+    pdb_list[[i]] <- trimmed_data
+    
+# Extract the B factors from the trimmed data and store them in the b_factors list
+    b_factors[[i]] <- trimmed_data$atom$b
+  }
+
+# Set up the plotting area for side-by-side plots of each protein's B factors
+  par(mfrow = c(1, length(pdb_files)))
+
+# Loop to iterate over each PDB file for plotting:
+  for(i in 1:length(pdb_files)) {
+    
+# Plot the B factors for each protein
+# Using the trimmed PDB data for the secondary structure elements in the plot
+# The plot type is a line plot
+# The y-axis label is set to "Bfactor"
+# The title for each plot indicates which protein it represents
+    plotb3(b_factors[[i]], sse = pdb_list[[i]], typ = "l", ylab = "Bfactor", main = paste("Bfactor for", pdb_files[i]))
+  }
+
+# Return the b_factors list invisibly (without printing to console)
+  invisible(b_factors)
+}
+
+# Example result: Print the B factors for 3 example files.
+## b_factors_result <- analyze_protein_interactions(c("protein1.pdb", "protein2.pdb", "protein3.pdb"))
+## print(b_factors_result)
+```
+
+

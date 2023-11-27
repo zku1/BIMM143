@@ -1,0 +1,48 @@
+---
+title: "RNASeq"
+author: "Zaneta Ku"
+date: "2023-11-06"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Q13: Read this file into R and determine the sample size for each genotype and their corresponding median expression levels for each of these genotypes. 
+
+```{r}
+# Read the data file using read.table()
+data <- read.table("bioboot.github.io_bggn213_W19_class-material_rs8067378_ENSG00000172057.6.txt", 
+                   header = TRUE, sep = " ")
+
+# Display a summary of the data
+summary(data)
+
+# Calculating sample size for each genotype
+sample_size <- table(data$geno)
+
+# Generating a boxplot and saving the output to an object
+bp <- boxplot(exp ~ geno, data = data, plot = FALSE)
+
+# Median expression levels for each genotype can be found in the bp object
+median_expression <- bp$stats[3,]
+
+# Display the results
+print("Sample sizes for each genotype:")
+print(sample_size)
+print("Median expression levels for each genotype:")
+print(median_expression)
+
+```
+
+# Q14: Generate a boxplot with a box per genotype, what could you infer from the relative expression value between A/A and G/G displayed in this plot? Does the SNP effect the expression of ORMDL3?
+
+```{r}
+# Generating the boxplot
+boxplot(exp ~ geno, data = data, main = "Expression by Genotype",
+        xlab = "Genotype", ylab = "Expression Level", 
+        col = c("lightblue", "lightgreen", "pink"))
+
+```
+The boxplot suggests that the A/A genotype is associated with higher ORMDL3 expression levels compared to the G/G genotype, indicating that the SNP may influence gene expression. The A/G genotype shows intermediate expression levels, supporting a potential additive genetic effect on ORMDL3 expression.
