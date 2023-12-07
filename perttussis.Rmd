@@ -1,0 +1,314 @@
+---
+title: "pertussis"
+author: "Zaneta Ku"
+date: "2023-12-06"
+output: pdf_document
+---
+
+# 1. Investigating pertussis cases by year
+
+## Q1. With the help of the R "addin" package datapasta assign the CDC pertussis case number data to a data frame called cdc and use ggplot to make a plot of cases numbers over time.
+
+```{r}
+library(datapasta)
+library(ggplot2)
+
+cdc <- data.frame(
+  Year = c(1922L, 1923L, 1924L, 1925L, 1926L, 1927L, 1928L, 1929L, 1930L, 1931L, 1932L, 1933L, 1934L, 1935L, 1936L, 1937L, 1938L, 1939L, 1940L, 1941L, 1942L, 1943L, 1944L, 1945L, 1946L, 1947L, 1948L, 1949L, 1950L, 1951L, 1952L, 1953L, 1954L, 1955L, 1956L, 1957L, 1958L, 1959L, 1960L, 1961L, 1962L, 1963L, 1964L, 1965L, 1966L, 1967L, 1968L, 1969L, 1970L, 1971L, 1972L, 1973L, 1974L, 1975L, 1976L, 1977L, 1978L, 1979L, 1980L, 1981L, 1982L, 1983L, 1984L, 1985L, 1986L, 1987L, 1988L, 1989L, 1990L, 1991L, 1992L, 1993L, 1994L, 1995L, 1996L, 1997L, 1998L, 1999L, 2000L, 2001L, 2002L, 2003L, 2004L, 2005L, 2006L, 2007L, 2008L, 2009L, 2010L, 2011L, 2012L, 2013L, 2014L, 2015L, 2016L, 2017L, 2018L, 2019L, 2020L, 2021L),
+  No_Reported_Pertussis_Cases = c(107473, 164191, 165418, 152003, 202210, 181411, 161799, 197371, 166914, 172559, 215343, 179135, 265269, 180518, 147237, 214652, 227319, 103188, 183866, 222202, 191383, 191890, 109873, 133792, 109860, 156517, 74715, 69479, 120718, 68687, 45030, 37129, 60886, 62786, 31732, 28295, 32148, 40005, 14809, 11468, 17749, 17135, 13005, 6799, 7717, 9718, 4810, 3285, 4249, 3036, 3287, 1759, 2402, 1738, 1010, 2177, 2063, 1623, 1730, 1248, 1895, 2463, 2276, 3589, 4195, 2823, 3450, 4157, 4570, 2719, 4083, 6586, 4617, 5137, 7796, 6564, 7405, 7298, 7867, 7580, 9771, 11647, 25827, 25616, 15632, 10454, 13278, 16858, 27550, 18719, 48277, 28639, 32971, 20762, 17972, 18975, 15609, 18617, 6124, 2116)
+)
+```
+
+```{r}
+ggplot(cdc, aes(x = Year, y = No_Reported_Pertussis_Cases)) +
+  geom_point() +
+  geom_line() +
+  labs(title = "Pertussis Cases Over Time in the United States",
+       x = "Year",
+       y = "Number of Reported Pertussis Cases")
+```
+
+# 2. A tale of two vaccines (wP & aP)
+
+## Q2. Using the ggplot geom_vline() function add lines to your previous plot for the 1946 introduction of the wP vaccine and the 1996 switch to aP vaccine (see example in the hint below). What do you notice?
+
+```{r}
+ggplot(cdc, aes(x = Year, y = No_Reported_Pertussis_Cases)) +
+  geom_point() +
+  geom_line() +
+  geom_vline(xintercept = 1946, color = "red", linetype = "dashed", size = 1) +
+  geom_vline(xintercept = 1996, color = "blue", linetype = "dashed", size = 1) +
+  labs(title = "Pertussis Cases Over Time with Vaccine Introductions",
+       x = "Year",
+       y = "Number of Reported Pertussis Cases",
+       caption = "Red Line: wP Vaccine (1946), Blue Line: aP Vaccine (1996)")
+
+```
+
+
+## Q3. Describe what happened after the introduction of the aP vaccine? Do you have a possible explanation for the observed trend?
+
+After introducing the aP vaccine in 1996, pertussis cases initially decreased but have shown a resurgence in recent years.
+
+# 3. Exploring CMI-PB data
+
+The CMI-PB API returns JSON data
+
+```{r}
+# Allows us to read, write and process JSON data
+library(jsonlite)
+```
+
+```{r}
+subject <- read_json("https://www.cmi-pb.org/api/subject", simplifyVector = TRUE) 
+```
+
+```{r}
+head(subject, 3)
+```
+
+## Q4. How may aP and wP infancy vaccinated subjects are in the dataset?
+
+```{r}
+table(subject$infancy_vac)
+```
+
+## Q5. How many Male and Female subjects/patients are in the dataset?
+
+```{r}
+# Count of Male and Female subjects based on the 'biological_sex' column
+sex_count <- table(subject$biological_sex)
+
+# Print the count
+print(sex_count)
+
+```
+
+```{r}
+# Load the jsonlite package
+library(jsonlite)
+
+# Read the data from the CMI-PB API
+subject <- read_json("https://www.cmi-pb.org/api/subject", simplifyVector = TRUE)
+
+# Count of Male and Female subjects
+sex_count <- table(subject$sex)
+
+# Print the count
+print(sex_count)
+
+```
+
+
+## Q6. What is the breakdown of race and biological sex (e.g. number of Asian females, White males etc…)?
+
+```{r}
+# Breakdown of race and biological sex
+# Replace 'race' with the actual column name for race in your data frame, if it's different
+race_sex_breakdown <- table(subject$race, subject$biological_sex)
+
+# Print the breakdown
+print(race_sex_breakdown)
+
+```
+
+## Q7. Using this approach determine (i) the average age of wP individuals, (ii) the average age of aP individuals; and (iii) are they significantly different?
+
+```{r}
+# Install and load the lubridate package
+if (!requireNamespace("lubridate", quietly = TRUE)) {
+  install.packages("lubridate")
+}
+
+library(lubridate)
+library(dplyr)
+
+# Use today's date to calculate age in days
+subject$age <- today() - ymd(subject$year_of_birth)
+
+# aP
+ap <- subject %>% filter(infancy_vac == "aP")
+round(summary(time_length(ap$age, "years")))
+
+# wP
+wp <- subject %>% filter(infancy_vac == "wP")
+round(summary(time_length(wp$age, "years")))
+
+```
+
+
+## Q8. Determine the age of all individuals at time of boost?
+
+```{r}
+int <- ymd(subject$date_of_boost) - ymd(subject$year_of_birth)
+age_at_boost <- time_length(int, "year")
+head(age_at_boost)
+```
+
+## Q9. With the help of a faceted boxplot (see below), do you think these two groups are significantly different?
+
+```{r}
+ggplot(subject) +
+  aes(time_length(age, "year"),
+      fill=as.factor(infancy_vac)) +
+  geom_histogram(show.legend=FALSE) +
+  facet_wrap(vars(infancy_vac), nrow=2) 
+```
+
+Joining multiple tables
+
+```{r}
+library(jsonlite)
+
+# Read the specimen data
+specimen <- read_json("https://www.cmi-pb.org/api/specimen", simplifyVector = TRUE)
+
+# Read the ab_titer data from the correct API endpoint
+titer <- read_json("https://www.cmi-pb.org/api/plasma_ab_titer", simplifyVector = TRUE)
+
+```
+
+## Q9. Complete the code to join specimen and subject tables to make a new merged data frame containing all specimen records along with their associated subject details:
+
+```{r}
+meta <- full_join(specimen, subject)
+dim(meta)
+head(meta)
+
+```
+
+## Q10. Now using the same procedure join meta with titer data so we can further analyze this data in terms of time of visit aP/wP, male/female etc.
+
+```{r}
+abdata <- inner_join(titer, meta)
+dim(abdata)
+
+```
+
+## Q11. How many specimens (i.e. entries in abdata) do we have for each isotype?
+
+```{r}
+table(abdata$isotype)
+
+```
+
+## Q12. What do you notice about the number of visit 8 specimens compared to other visits?
+
+```{r}
+visit_count <- table(abdata$visit)
+print(visit_count)
+
+```
+
+# 4. Examine IgG1 Ab titer levels
+
+```{r}
+ig1 <- abdata %>% filter(isotype == "IgG1", visit!=8)
+head(ig1)
+```
+
+## Q13. Complete the following code to make a summary boxplot of Ab titer levels for all antigens:
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Filter for IgG1 isotype and exclude visit 8 entries
+ig1 <- abdata %>% filter(isotype == "IgG1", visit != 8)
+
+# Create a boxplot
+ggplot(ig1) +
+  aes(y = antigen, x =specimen_id ) +
+  geom_boxplot() + 
+  facet_wrap(vars(visit), nrow=2)
+
+```
+
+
+## Q15. Filter to pull out only two specific antigens for analysis and create a boxplot for each. You can chose any you like. Below I picked a “control” antigen (“Measles”, that is not in our vaccines) and a clear antigen of interest (“FIM2/3”, extra-cellular fimbriae proteins from B. pertussis that participate in substrate attachment).
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# For "Measles"
+measles_plot <- filter(ig1, antigen == "Measles") %>%
+  ggplot() +
+  aes(x = specimen_id, col = infancy_vac) +
+  geom_boxplot(show.legend = FALSE) +
+  facet_wrap(vars(visit)) +
+  theme_bw()
+print(measles_plot)
+```
+
+```{r}
+# For "FIM2/3"
+fim23_plot <- filter(ig1, antigen == "FIM2/3") %>%
+  ggplot() +
+  aes(x = specimen_id, col = infancy_vac) +
+  geom_boxplot(show.legend = FALSE) +
+  facet_wrap(vars(visit)) +
+  theme_bw()
+
+print(fim23_plot)
+```
+
+# 5. Obtaining CMI-PB RNASeq data
+
+```{r}
+url <- "https://www.cmi-pb.org/api/v2/rnaseq?versioned_ensembl_gene_id=eq.ENSG00000211896.7"
+
+rna <- read_json(url, simplifyVector = TRUE) 
+
+```
+
+
+```{r}
+#meta <- inner_join(specimen, subject)
+ssrna <- inner_join(rna, meta)
+```
+
+## Q18. Make a plot of the time course of gene expression for IGHG1 gene (i.e. a plot of visit vs. tpm).
+
+```{r}
+ggplot(ssrna) +
+  aes(visit, tpm, group=subject_id) +
+  geom_point() +
+  geom_line(alpha=0.2)
+```
+
+## Q19.: What do you notice about the expression of this gene (i.e. when is it at it’s maximum level)?
+
+This suggests that visit 4 is a critical time point where the gene is highly active or expressed.
+
+```{r}
+ggplot(ssrna) +
+  aes(tpm, col=infancy_vac) +
+  geom_boxplot() +
+  facet_wrap(vars(visit))
+```
+
+```{r}
+ssrna %>%  
+  filter(visit==4) %>% 
+  ggplot() +
+    aes(tpm, col=infancy_vac) + geom_density() + 
+    geom_rug() 
+```
+
+## plot of planned_day_relative_to_boost vs MFI_normalised 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+ggplot(abdata, aes(x = planned_day_relative_to_boost, y = MFI_normalised)) +
+  geom_point() +
+  labs(title = "Planned Day Relative to Boost vs MFI Normalised",
+       x = "Planned Day Relative to Boost",
+       y = "MFI Normalised") +
+  theme_minimal()
+
+```
+
